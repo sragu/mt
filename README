@@ -9,3 +9,12 @@ Usage:
 ./process.rb app.xml.trb
 
 See: app.xml.trb for sample config file
+
+Output:
+```
+<!-- updated by sraguram on Sun Oct 27 23:22:33 +0000 2013 -->
+<appSettings>
+  <app name="rabbit.host" value="rabbitmq.local" />
+  <app name="service.endpoint" value="http://host.dev" />
+</appSettings>
+```
