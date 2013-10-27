@@ -5,9 +5,9 @@
 
 __CONFIG__
 ---
-env: ['dev', 'qa', 'prod']
-vars: 
-  RABBIT_HOST: 
+env: ['dev', 'qa', 'prod'] 
+vars:
+  RABBIT_HOST:
     dev:  rabbitmq.local
     qa:  rabbitmq.qa.local
     prod: rabbitmq.prod.com
@@ -15,4 +15,3 @@ vars:
     dev: "http://host.dev"
     qa: "http://host.qa"
     prod: "http://host.prod"
-

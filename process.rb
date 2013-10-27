@@ -25,9 +25,11 @@ yConfig = YAML::load(config)
 
 yConfig['env'].each do | env | 
   output = String.new content
-  FileUtils.mkdir_p("#{output_dir}/#{env}")
-  File.open("#{output_dir}/#{env}/#{filename}", 'w') do |output_config| 
-    yConfig['vars'].each { |varname| output.gsub!(Regexp.new(varname[0]), varname[1][env]) }
+  output_file = "#{output_dir}/#{env}/#{File.basename(filename, '.*')}"
+  FileUtils.mkdir_p File.dirname(output_file)
+
+  File.open(output_file, 'w') do |output_config| 
+    yConfig['vars'].each { |key, value| output.gsub! Regexp.new("%#{key}%"), value[env] }
     output_config << output
   end
 end
