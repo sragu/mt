@@ -4,19 +4,15 @@ require 'yaml'
 require 'fileutils'
 require 'erb'
 
-def load_config(file)
+def load_template(file)
   content, config, reading_config = '', '', false
 
   File.open(file).each_line do |s|
-    if s =~ /^__CONFIG__/
-      reading_config = true
-      next 
-    end
-
+    (reading_config = true; next) if s =~ /^__CONFIG__/ 
     (reading_config ? config : content) << s
   end
 
-  [content, config]
+  [content, YAML::load(ERB.new(config).result)]
 end
 
 def destination(directory, env, filename) 
@@ -27,15 +23,14 @@ end
 
 output_dir = "build"
 filename = ARGV[0]
-content, config = load_config(filename)
-yConfig = YAML::load(ERB.new(config).result)
+content, config = load_template(filename)
 
-yConfig['env'].each do | env | 
+config['env'].each do | env | 
   output = String.new content
   output_file = destination(output_dir, env, filename)
 
   File.open(output_file, 'w') do |output_config| 
-    yConfig['vars'].each { |key, value| output.gsub! Regexp.new("%#{key}%"), value[env] || value['default'] }
+    config['vars'].each { |key, value| output.gsub! Regexp.new("%#{key}%"), value[env] || value['default'] }
     output_config << output
   end
 end
