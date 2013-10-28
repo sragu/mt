@@ -1,3 +1,5 @@
+#mt: minimal template
+
 A simple ruby script to manage config files.
 
 The config file has two sections namely content and config separated by a delimiter (`__CONFIG__`) more like ruby `__END__`. The content section could have simple template varibles of the the sytle %VARNAME%, for which the values are provided on the config section.
