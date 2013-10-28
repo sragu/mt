@@ -15,10 +15,13 @@ def load_template(file)
   [content, YAML::load(ERB.new(config).result)]
 end
 
-def destination(directory, env, filename) 
-  output_path = "#{directory}/#{env}/#{File.basename(filename, '.*')}"
-  FileUtils.makedirs File.dirname(output_path)
-  output_path
+def file_autocreate(path)
+  directory = File.dirname(path)
+  FileUtils.makedirs(directory) unless File.exists?(directory)
+
+  File.open(path, 'w') do |file|
+    yield(file) if block_given?
+  end
 end
 
 output_dir = "build"
@@ -27,10 +30,10 @@ content, config = load_template(filename)
 
 config['env'].each do | env | 
   output = String.new content
-  output_file = destination(output_dir, env, filename)
+  output_path = "#{output_dir}/#{env}/#{File.basename(filename, '.*')}"
 
-  File.open(output_file, 'w') do |output_config| 
+  file_autocreate(output_path) do |file| 
     config['vars'].each { |key, value| output.gsub! Regexp.new("%#{key}%"), value[env] || value['default'] }
-    output_config << output
+    file << output
   end
 end
