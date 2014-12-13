@@ -1,7 +1,7 @@
 <!-- $signature -->
 <appSettings>
   <app name="rabbit.host" value="$rabbit_host" />
-  <app name="service.endpoint" value="$service_url" />
+  <app name="service.endpoint" value="http://host.$env" />
 </appSettings>
 
 __CONFIG__
@@ -9,12 +9,8 @@ __CONFIG__
 env: ['dev', 'qa', 'prod'] 
 vars:
   rabbit_host:
-    dev:  rabbitmq.local
     qa:   rabbitmq.qa.local
     prod: rabbitmq.prod.com
-  service_url:
-    dev:  http://host.dev
-    qa:   http://host.qa
-    prod: http://host.prod
+    default: rabbitmq.local
   signature:
    default: updated by <%= ENV['USER'] %> on <%= Time.now %>
