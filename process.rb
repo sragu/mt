@@ -32,8 +32,8 @@ config['env'].each do | env |
   output = String.new content
   output_path = "#{output_dir}/#{env}/#{File.basename(filename, '.*')}"
 
-  file_autocreate(output_path) do |file| 
-    config['vars'].each { |key, value| output.gsub! Regexp.new("%#{key}%"), value[env] || value['default'] }
+  file_autocreate(output_path) do |file|
+    config['vars'].each { |key, value| output.gsub! /\$#{key}\b/, (value[env] || value['default']).to_s }
     file << output
   end
 end
