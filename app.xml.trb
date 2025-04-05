@@ -13,4 +13,4 @@ vars:
     prod: rabbitmq.prod.com
     default: rabbitmq.local
   signature:
-   default: updated by <%= ENV['USER'] %> on <%= Time.now %>
+   default: updated by <%= ENV['USER'] %> on <%= Time.now %> for $env

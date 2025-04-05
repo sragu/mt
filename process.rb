@@ -4,38 +4,41 @@ require 'yaml'
 require 'fileutils'
 require 'erb'
 
-def load_template(file)
-  content, config, reading_config = '', '', false
-
-  File.open(file).each_line do |s|
-    (reading_config = true; next) if s =~ /^__CONFIG__/ 
-    (reading_config ? config : content) << s
-  end
-
-  [content, YAML::load(ERB.new(config).result)]
+def extract_content_and_config(file)
+  content, config_string = File.read(file).split(/^__CONFIG__$/, 2)
+  config = YAML.safe_load(ERB.new(config_string).result, permitted_classes: [String, Symbol, Integer, Hash, Array, TrueClass, FalseClass])
+  [content.strip, config]
 end
 
-def file_autocreate(path)
-  directory = File.dirname(path)
-  FileUtils.makedirs(directory) unless File.exists?(directory)
+def generate_file(content, vars, env, output_path)
+  output = content.gsub(/\$\w+\b/) do |match|
+    key = match[1..]
+    (vars[key][env] || vars[key]['default']).to_s.gsub(/\$env\b/, env)
+  end
 
-  File.open(path, 'w') do |file|
-    yield(file) if block_given?
+  FileUtils.mkdir_p(File.dirname(output_path))
+  
+  File.write(output_path, output)
+  puts "Generated: #{output_path}"
+end
+
+def process_template(template_file, output_dir = 'build')
+  content, config = extract_content_and_config(template_file)
+  
+  config['env'].each do |env|
+    vars = config['vars'].merge('env' => env)
+    output_path = File.join(output_dir, env, File.basename(template_file, '.*'))
+    
+    generate_file(content, vars, env, output_path)
   end
 end
 
-output_dir = "build"
-filename = ARGV[0]
-content, config = load_template(filename)
-
-config['env'].each do | env | 
-  output = String.new content
-  output_path = "#{output_dir}/#{env}/#{File.basename(filename, '.*')}"
-
-  config['vars']['env'] = env
-
-  file_autocreate(output_path) do |file|
-    config['vars'].each { |key, value| output.gsub! /\$#{key}\b/, (value[env] || value['default']).to_s.gsub(/\$env\b/, env) }
-     file << output
+# Main execution
+if $PROGRAM_NAME == __FILE__
+  if ARGV.empty?
+    $stderr.puts "Usage: #{$PROGRAM_NAME} <template_file> [output_dir]"
+    exit 1
   end
+
+  process_template(ARGV[0], ARGV[1])
 end
